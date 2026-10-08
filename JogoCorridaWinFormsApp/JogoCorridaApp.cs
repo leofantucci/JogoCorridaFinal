@@ -69,8 +69,6 @@ namespace JogoCorridaWinFormsApp
             jogo = new Jogo
             {
                 YMaximo = altura,
-                InicioXRua = 350,
-                FimXRua = 1650,
                 PoderAtivo = false,
                 PoderX = 0,
                 PoderY = -999,
@@ -78,6 +76,8 @@ namespace JogoCorridaWinFormsApp
                 Poder2X = 0,
                 Poder2Y = -999
             };
+
+            AplicarLimitesRuas();
 
             int dificuldade;
 
@@ -320,6 +320,82 @@ namespace JogoCorridaWinFormsApp
             this.BackgroundImageLayout = ImageLayout.Stretch;
         }
 
+        private void AplicarLimitesRuas()
+        {
+            // A imagem do cenário é esticada na tela, então os limites da rua são
+            // medidos na imagem e convertidos para a largura da tela.
+            // Cada cenário tem resolução/posição diferente, por isso os valores mudam.
+            int largura = Screen.PrimaryScreen.Bounds.Width;
+
+            double inicioRua1, fimRua1, inicioRua2, fimRua2;
+
+            if (cenarioSelecionado == TipoCenario.Areas_Rochosas)
+            {
+                if (isMultiplayer)
+                {
+                    // Duas ruas: 12.2% - 39.1% e 59.8% - 86.7% da largura
+                    inicioRua1 = 0.122; fimRua1 = 0.391;
+                    inicioRua2 = 0.598; fimRua2 = 0.867;
+                }
+                else
+                {
+                    // Uma rua: 24.5% - 74.7% da largura
+                    inicioRua1 = 0.245; fimRua1 = 0.747;
+                    inicioRua2 = inicioRua1; fimRua2 = fimRua1;
+                }
+            }
+            else if (cenarioSelecionado == TipoCenario.Alem_Do_Mundo)
+            {
+                if (isMultiplayer)
+                {
+                    // 17.0% - 39.5% e 61.1% - 81.9% da largura
+                    inicioRua1 = 0.170; fimRua1 = 0.395;
+                    inicioRua2 = 0.611; fimRua2 = 0.819;
+                }
+                else
+                {
+                    // 26.8% - 72.6% da largura
+                    inicioRua1 = 0.268; fimRua1 = 0.726;
+                    inicioRua2 = inicioRua1; fimRua2 = fimRua1;
+                }
+            }
+            else if (cenarioSelecionado == TipoCenario.Terras_Desconhecidas)
+            {
+                if (isMultiplayer)
+                {
+                    // 14.4% - 34.5% e 65.5% - 85.6% da largura
+                    inicioRua1 = 0.144; fimRua1 = 0.345;
+                    inicioRua2 = 0.655; fimRua2 = 0.856;
+                }
+                else
+                {
+                    // 30.1% - 68.1% da largura
+                    inicioRua1 = 0.301; fimRua1 = 0.681;
+                    inicioRua2 = inicioRua1; fimRua2 = fimRua1;
+                }
+            }
+            else // Floresta_Feliz
+            {
+                if (isMultiplayer)
+                {
+                    // 3.5% - 34.0% e 66.0% - 96.5% da largura
+                    inicioRua1 = 0.035; fimRua1 = 0.340;
+                    inicioRua2 = 0.660; fimRua2 = 0.965;
+                }
+                else
+                {
+                    // 30.0% - 72.0% da largura
+                    inicioRua1 = 0.300; fimRua1 = 0.720;
+                    inicioRua2 = inicioRua1; fimRua2 = fimRua1;
+                }
+            }
+
+            jogo.InicioXRua = (int)(inicioRua1 * largura);
+            jogo.FimXRua = (int)(fimRua1 * largura);
+            jogo.InicioXRua2 = (int)(inicioRua2 * largura);
+            jogo.FimXRua2 = (int)(fimRua2 * largura);
+        }
+
         private string CaminhoAudio(string nome)
         {
             return Path.Combine(
@@ -437,9 +513,6 @@ namespace JogoCorridaWinFormsApp
             {
                 fase2Ativada = true;
 
-                jogo.InicioXRua = 300;
-                jogo.FimXRua = 1550;
-
                 jogo.LimparObstaculos();
 
                 int dificuldade = nivel == 1 ? 1 :
@@ -549,11 +622,11 @@ namespace JogoCorridaWinFormsApp
 
             int velocidade = 20;
 
-            if (Left2Pressed && jogo.Carro2.PosicaoX > jogo.InicioXRua)
+            if (Left2Pressed && jogo.Carro2.PosicaoX > jogo.InicioXRua2)
                 jogo.Carro2.PosicaoX -= velocidade;
 
             if (Right2Pressed &&
-                jogo.Carro2.PosicaoX < jogo.FimXRua - jogo.Carro2.Largura)
+                jogo.Carro2.PosicaoX < jogo.FimXRua2 - jogo.Carro2.Largura)
                 jogo.Carro2.PosicaoX += velocidade;
 
             if (Up2Pressed && jogo.Carro2.PosicaoY > jogo.InicioYRua)
@@ -767,24 +840,42 @@ namespace JogoCorridaWinFormsApp
         {
             painelFim = new Panel
             {
-                Size = new Size(500, 400),
-                BackColor = Color.FromArgb(230, Color.Black)
+                Size = new Size(520, 400),
+                BackColor = Color.FromArgb(245, 14, 20, 36)
             };
 
             painelFim.Left = (ClientSize.Width - painelFim.Width) / 2;
             painelFim.Top = (ClientSize.Height - painelFim.Height) / 2;
 
-            int topo = 30;
+            // Cabeçalho do menu de fim de jogo
+            Label lblFimTitulo = new Label
+            {
+                AutoSize = false,
+                Width = painelFim.Width,
+                Height = 58,
+                Text = "FIM DE JOGO",
+                BackColor = Color.Gold,
+                ForeColor = Color.Black,
+                Font = new Font("Arial", 26, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Top = 0,
+                Left = 0
+            };
+
+            painelFim.Controls.Add(lblFimTitulo);
+
+            int topo = 74;
 
             if (isMultiplayer)
             {
                 lblFimPontuacao = new Label
                 {
                     AutoSize = false,
-                    Width = 500,
+                    Width = painelFim.Width,
                     Height = 50,
                     Text = $"P1: {jogo.Pontuacao} PTS",
                     ForeColor = Color.White,
+                    BackColor = Color.Transparent,
                     Font = new Font("Arial", 24, FontStyle.Bold),
                     TextAlign = ContentAlignment.MiddleCenter,
                     Top = topo,
@@ -798,10 +889,11 @@ namespace JogoCorridaWinFormsApp
                 lblFimPontuacao2 = new Label
                 {
                     AutoSize = false,
-                    Width = 500,
+                    Width = painelFim.Width,
                     Height = 50,
                     Text = $"P2: {jogo.Pontuacao2} PTS",
                     ForeColor = Color.White,
+                    BackColor = Color.Transparent,
                     Font = new Font("Arial", 24, FontStyle.Bold),
                     TextAlign = ContentAlignment.MiddleCenter,
                     Top = topo,
@@ -817,10 +909,11 @@ namespace JogoCorridaWinFormsApp
                 lblFimPontuacao = new Label
                 {
                     AutoSize = false,
-                    Width = 500,
+                    Width = painelFim.Width,
                     Height = 50,
                     Text = $"PONTUAÇÃO: {jogo.Pontuacao}",
                     ForeColor = Color.White,
+                    BackColor = Color.Transparent,
                     Font = new Font("Arial", 24, FontStyle.Bold),
                     TextAlign = ContentAlignment.MiddleCenter,
                     Top = topo,
@@ -835,10 +928,11 @@ namespace JogoCorridaWinFormsApp
             lblFimRecorde = new Label
             {
                 AutoSize = false,
-                Width = 500,
+                Width = painelFim.Width,
                 Height = 50,
                 Text = $"RECORDE: {jogo.MelhorPontuacao}",
-                ForeColor = Color.White,
+                ForeColor = Color.Gold,
+                BackColor = Color.Transparent,
                 Font = new Font("Arial", 24, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Top = topo,
@@ -848,22 +942,42 @@ namespace JogoCorridaWinFormsApp
             Button btnReiniciar = new Button
             {
                 Text = "REINICIAR",
-                Width = 180,
-                Height = 60,
+                Width = 200,
+                Height = 64,
                 Font = new Font("Arial", 14, FontStyle.Bold),
-                Left = 50,
-                Top = topo + 60
+                Left = 40,
+                Top = topo + 70,
+                BackColor = Color.FromArgb(0, 145, 70),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                UseVisualStyleBackColor = false
             };
+
+            btnReiniciar.FlatAppearance.BorderColor = Color.White;
+            btnReiniciar.FlatAppearance.BorderSize = 2;
+            btnReiniciar.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 185, 92);
+            btnReiniciar.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 110, 55);
 
             Button btnMenu = new Button
             {
                 Text = "VOLTAR AO MENU",
-                Width = 180,
-                Height = 60,
+                Width = 220,
+                Height = 64,
                 Font = new Font("Arial", 14, FontStyle.Bold),
-                Left = 270,
-                Top = topo + 60
+                Left = 260,
+                Top = topo + 70,
+                BackColor = Color.FromArgb(190, 40, 40),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                UseVisualStyleBackColor = false
             };
+
+            btnMenu.FlatAppearance.BorderColor = Color.White;
+            btnMenu.FlatAppearance.BorderSize = 2;
+            btnMenu.FlatAppearance.MouseOverBackColor = Color.FromArgb(230, 60, 60);
+            btnMenu.FlatAppearance.MouseDownBackColor = Color.FromArgb(150, 30, 30);
 
             btnReiniciar.Click += BtnReiniciar_Click;
             btnMenu.Click += BtnMenu_Click;
@@ -898,8 +1012,7 @@ namespace JogoCorridaWinFormsApp
             picCarro.Visible = true;
             picCarro2.Visible = isMultiplayer;
 
-            jogo.InicioXRua = 350;
-            jogo.FimXRua = 1650;
+            AplicarLimitesRuas();
 
             jogo.IniciaJogo(
                 nivel == 1 ? 1 :

@@ -22,8 +22,15 @@ namespace JogoCorrida
         public int ColisoesPermitidas { get; set; }
 
         public int YMaximo { get; set; }
+
+        // Rua 1: pista do Jogador 1
         public int InicioXRua { get; set; }
         public int FimXRua { get; set; }
+
+        // Rua 2: pista do Jogador 2 (quando o cenário tem duas ruas)
+        public int InicioXRua2 { get; set; }
+        public int FimXRua2 { get; set; }
+
         public int InicioYRua { get; set; }
         public int FimYRua { get; set; }
 
@@ -78,19 +85,14 @@ namespace JogoCorrida
 
             if (isMultiplayer)
             {
-                Carro.PosicaoX -= 90;
-
                 Carro2 = new Elemento
                 {
                     Tipo = TipoElemento.Carro,
-                    PosicaoX = PosicionaObjeto(1) + 90,
+                    PosicaoX = PosicionaObjeto(2),
                     PosicaoY = YMaximo - 222,
                     Largura = 60,
                     Altura = 150
                 };
-
-                if (Carro2.PosicaoX + Carro2.Largura > FimXRua)
-                    Carro2.PosicaoX = FimXRua - Carro2.Largura;
 
                 Poder2X = Carro2.PosicaoX;
             }
@@ -179,12 +181,28 @@ namespace JogoCorrida
                 return InicioXRua + ((FimXRua - InicioXRua) / 2);
             }
 
+            if (key == 2)
+            {
+                // Se o cenário não tem a rua 2 mapeada, usa a rua 1
+                if (FimXRua2 <= InicioXRua2)
+                    return PosicionaObjeto(1);
+
+                return InicioXRua2 + ((FimXRua2 - InicioXRua2) / 2);
+            }
+
             if (key == 9)
             {
                 int larguraObjeto = 60;
 
                 int minimo = InicioXRua;
                 int maximo = FimXRua - larguraObjeto;
+
+                // Sorteia em qual das duas ruas o obstáculo vai nascer
+                if (FimXRua2 > InicioXRua2 && rnd.Next(2) == 0)
+                {
+                    minimo = InicioXRua2;
+                    maximo = FimXRua2 - larguraObjeto;
+                }
 
                 if (maximo <= minimo)
                     return minimo;

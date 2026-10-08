@@ -166,6 +166,7 @@ namespace JogoCorridaWinFormsApp
                 indiceSelecionado++;
                 if (indiceSelecionado >= listaPersonagens.Count) indiceSelecionado = 0; // Se chegou no fim, volta pro começo
                 AtualizarBordaVisual();
+                somClick.Play(); // Som junto com a animação da borda
                 return true;
             }
             else if (keyData == Keys.Left || keyData == Keys.A)
@@ -173,6 +174,7 @@ namespace JogoCorridaWinFormsApp
                 indiceSelecionado--;
                 if (indiceSelecionado < 0) indiceSelecionado = listaPersonagens.Count - 1; // Se chegou no começo, vai pro fim
                 AtualizarBordaVisual();
+                somClick.Play(); // Som junto com a animação da borda
                 return true;
             }
             else if (keyData == Keys.Enter)
@@ -200,8 +202,9 @@ namespace JogoCorridaWinFormsApp
             if (isMultiplayer && jogadorAtual == 2 && clicado == personagemP1) return;
 
             indiceSelecionado = listaPersonagens.IndexOf(clicado);
-            somClick.Play();
             AtualizarBordaVisual();
+            // O som da confirmação é tocado dentro de IniciarTransicao,
+            // no mesmo instante em que a borda começa a piscar
             ConfirmarSelecao(clicado);
         }
 
@@ -242,7 +245,9 @@ namespace JogoCorridaWinFormsApp
             }
             while (personagemVencedor.Name == "picAleatorio" || (isMultiplayer && jogadorAtual == 2 && personagemVencedor == personagemP1));
 
-            somRoleta.Play();
+            // Toca em loop para o som durar exatamente enquanto a roleta gira
+            somRoleta.Stop();
+            somRoleta.PlayLooping();
 
             cronometroRoleta.Restart();
             timerRoleta.Interval = 40; //velocidade de incio rapida
@@ -295,8 +300,11 @@ namespace JogoCorridaWinFormsApp
         private void IniciarTransicao(PictureBox personagemEscolhido)
         {
             telaTravada = true;
-            //SOM DE CONFIRMAÇÃO
-            // new System.Media.SoundPlayer(@"C:\caminho\som_escolhido.wav").Play();
+
+            // Para a roleta no mesmo instante em que a animação de confirmação começa
+            // e toca o som da seleção junto com o primeiro piscar da borda
+            somRoleta.Stop();
+            somClick.Play();
 
             int piscadas = 0;
             System.Windows.Forms.Timer timerPiscar = new System.Windows.Forms.Timer();
@@ -338,6 +346,9 @@ namespace JogoCorridaWinFormsApp
                     telaTravada = false;
                     bordaAcesa = true;
                     AtualizarBordaVisual();
+
+                    // Som no mesmo instante em que a borda do P2 aparece
+                    somClick.Play();
                 }
                 else
                 {
@@ -369,6 +380,9 @@ namespace JogoCorridaWinFormsApp
         }
         private void TrocarDeTela(Form proximaTela)
         {
+            // Garante que nenhum som fique tocando com a tela escondida
+            somRoleta.Stop();
+
             proximaTela.Show(); // Abre a tela nova por cima
 
             // Espera 100 milissegundos antes de esconder a tela velha
