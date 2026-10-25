@@ -1,4 +1,5 @@
 using JogoCorrida;
+using System.Diagnostics;
 using System.IO;
 using System.Media;
 
@@ -14,7 +15,17 @@ namespace JogoCorridaWinFormsApp
 
         private readonly List<PictureBox> pictureBoxes = [];
 
-        private DateTime tempoUltimaMovimentacao;
+        private readonly Stopwatch relogioJogo = Stopwatch.StartNew();
+        private readonly Image imagemCone = Properties.Resources.cone;
+        private readonly Image imagemCarroBatido = Properties.Resources.carro_batido;
+
+        private long ultimoQuadroMs;
+        private double acumuladorObstaculos;
+        private double acumuladorPoder;
+        private double acumuladorPoder2;
+        private double pixelsObstaculoPorMs;
+        private List<Elemento>? obstaculosVisuais;
+
         private DateTime tempoUltimaPontuacao;
         private DateTime tempoInicioJogo;
         private DateTime horaMostrouExplosao;
@@ -102,6 +113,9 @@ namespace JogoCorridaWinFormsApp
 
             jogo.IniciaJogo(dificuldade, isMultiplayer);
 
+            int intervaloObstaculos = Math.Max(30, (int)Math.Ceiling(jogo.Velocidade / 30.0) * 30);
+            pixelsObstaculoPorMs = 25.0 / intervaloObstaculos;
+
             picCarro.BackColor = Color.Transparent;
             picCarro.BackgroundImage = Properties.Resources.Novo_Projeto;
             picCarro.BackgroundImageLayout = ImageLayout.Stretch;
@@ -136,11 +150,12 @@ namespace JogoCorridaWinFormsApp
             CriarHUD();
             CriarObstaculosVisuais();
 
-            tempoUltimaMovimentacao = DateTime.Now;
             tempoUltimaPontuacao = DateTime.Now;
             tempoInicioJogo = DateTime.Now;
 
-            timerJogo.Interval = 30;
+            ultimoQuadroMs = relogioJogo.ElapsedMilliseconds;
+
+            timerJogo.Interval = 16;
             timerJogo.Enabled = true;
 
             Focus();
@@ -235,6 +250,8 @@ namespace JogoCorridaWinFormsApp
 
         private void CriarObstaculosVisuais()
         {
+            SuspendLayout();
+
             foreach (var pictureBox in pictureBoxes)
             {
                 Controls.Remove(pictureBox);
@@ -249,7 +266,8 @@ namespace JogoCorridaWinFormsApp
                 {
                     BackColor = Color.Transparent,
                     Size = new Size(ob.Largura, ob.Altura),
-                    SizeMode = PictureBoxSizeMode.StretchImage
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Location = new Point(ob.PosicaoX, ob.PosicaoY)
                 };
 
                 AtualizarImagemObstaculo(picOb, ob);
@@ -259,6 +277,8 @@ namespace JogoCorridaWinFormsApp
 
                 picOb.BringToFront();
             }
+
+            obstaculosVisuais = jogo.Obstaculos;
 
             picCarro.BringToFront();
             picCarro2.BringToFront();
@@ -271,19 +291,15 @@ namespace JogoCorridaWinFormsApp
             lblFase.BringToFront();
             lblTempo.BringToFront();
             lblControles.BringToFront();
+
+            ResumeLayout();
         }
 
         private void AtualizarImagemObstaculo(PictureBox pictureBox, Elemento obstaculo)
         {
-            if (jogo.GetTipoObstaculo(obstaculo) == TipoObstaculo.Cone)
-            {
-                pictureBox.BackgroundImage = Properties.Resources.cone;
-            }
-            else
-            {
-                pictureBox.BackgroundImage = Properties.Resources.carro_batido;
-            }
-
+            pictureBox.BackgroundImage = jogo.GetTipoObstaculo(obstaculo) == TipoObstaculo.Cone
+                ? imagemCone
+                : imagemCarroBatido;
             pictureBox.BackgroundImageLayout = ImageLayout.Stretch;
         }
 
@@ -322,9 +338,6 @@ namespace JogoCorridaWinFormsApp
 
         private void AplicarLimitesRuas()
         {
-            // A imagem do cenário é esticada na tela, então os limites da rua são
-            // medidos na imagem e convertidos para a largura da tela.
-            // Cada cenário tem resolução/posição diferente, por isso os valores mudam.
             int largura = Screen.PrimaryScreen.Bounds.Width;
 
             double inicioRua1, fimRua1, inicioRua2, fimRua2;
@@ -333,13 +346,11 @@ namespace JogoCorridaWinFormsApp
             {
                 if (isMultiplayer)
                 {
-                    // Duas ruas: 12.2% - 39.1% e 59.8% - 86.7% da largura
                     inicioRua1 = 0.13; fimRua1 = 0.38;
                     inicioRua2 = 0.59; fimRua2 = 0.84;
                 }
                 else
                 {
-                    // Uma rua: 24.5% - 74.7% da largura
                     inicioRua1 = 0.245; fimRua1 = 0.747;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
@@ -348,13 +359,11 @@ namespace JogoCorridaWinFormsApp
             {
                 if (isMultiplayer)
                 {
-                    // 17.0% - 39.5% e 61.1% - 81.9% da largura
                     inicioRua1 = 0.170; fimRua1 = 0.395;
                     inicioRua2 = 0.611; fimRua2 = 0.819;
                 }
                 else
                 {
-                    // 26.8% - 72.6% da largura
                     inicioRua1 = 0.3; fimRua1 = 0.6;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
@@ -363,28 +372,24 @@ namespace JogoCorridaWinFormsApp
             {
                 if (isMultiplayer)
                 {
-                    // 14.4% - 34.5% e 65.5% - 85.6% da largura
                     inicioRua1 = 0.144; fimRua1 = 0.345;
                     inicioRua2 = 0.655; fimRua2 = 0.856;
                 }
                 else
                 {
-                    // 30.1% - 68.1% da largura
                     inicioRua1 = 0.301; fimRua1 = 0.681;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
-            else // Floresta_Feliz
+            else
             {
                 if (isMultiplayer)
                 {
-                    // 3.5% - 34.0% e 66.0% - 96.5% da largura
                     inicioRua1 = 0.035; fimRua1 = 0.340;
                     inicioRua2 = 0.660; fimRua2 = 0.965;
                 }
                 else
                 {
-                    // 30.0% - 72.0% da largura
                     inicioRua1 = 0.300; fimRua1 = 0.720;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
@@ -505,6 +510,16 @@ namespace JogoCorridaWinFormsApp
             if (jogoFinalizado)
                 return;
 
+            long agora = relogioJogo.ElapsedMilliseconds;
+            double deltaMs = agora - ultimoQuadroMs;
+            ultimoQuadroMs = agora;
+
+            if (deltaMs <= 0)
+                return;
+
+            if (deltaMs > 50)
+                deltaMs = 50;
+
             AtualizarPontuacao();
 
             jogo.AtualizarFase();
@@ -537,10 +552,10 @@ namespace JogoCorridaWinFormsApp
 
             AtualizarHUD();
 
-            MovimentarCarroP1();
-            MovimentarCarroP2();
+            MovimentarCarroP1(deltaMs);
+            MovimentarCarroP2(deltaMs);
 
-            jogo.MovimentaPoder();
+            MovimentarPoderes(deltaMs);
 
             AtualizarPoderes();
 
@@ -550,13 +565,7 @@ namespace JogoCorridaWinFormsApp
                 MostrarExplosao(1);
             }
 
-            if ((DateTime.Now - tempoUltimaMovimentacao).TotalMilliseconds >= jogo.Velocidade)
-            {
-                tempoUltimaMovimentacao = DateTime.Now;
-
-                jogo.MovimentaObstaculos();
-                AtualizarPictureBoxes();
-            }
+            MovimentarObstaculos(deltaMs);
 
             if (VerificarColisoes())
                 return;
@@ -582,92 +591,132 @@ namespace JogoCorridaWinFormsApp
         {
             TimeSpan tempoDecorrido = DateTime.Now - tempoInicioJogo;
 
-            lblPontuacao.Text = $"P1: {jogo.Pontuacao} PTS";
-            lblPontuacao2.Text = $"P2: {jogo.Pontuacao2} PTS";
-            lblFase.Text = $"FASE {jogo.Fase}";
-            lblTempo.Text = $"TEMPO: {tempoDecorrido.Minutes:D2}:{tempoDecorrido.Seconds:D2}";
+            string pontuacao = $"P1: {jogo.Pontuacao} PTS";
+            string pontuacao2 = $"P2: {jogo.Pontuacao2} PTS";
+            string fase = $"FASE {jogo.Fase}";
+            string tempo = $"TEMPO: {tempoDecorrido.Minutes:D2}:{tempoDecorrido.Seconds:D2}";
+
+            if (lblPontuacao.Text != pontuacao) lblPontuacao.Text = pontuacao;
+            if (lblPontuacao2.Text != pontuacao2) lblPontuacao2.Text = pontuacao2;
+            if (lblFase.Text != fase) lblFase.Text = fase;
+            if (lblTempo.Text != tempo) lblTempo.Text = tempo;
         }
 
-        private void MovimentarCarroP1()
+        private void MovimentarCarroP1(double deltaMs)
         {
             if (!jogador1Ativo)
                 return;
 
-            int velocidade = 20;
+            int velocidade = Math.Max(1, (int)Math.Round(20 * deltaMs / 30.0));
 
-            if (LeftPressed && jogo.Carro.PosicaoX > jogo.InicioXRua)
-                jogo.Carro.PosicaoX -= velocidade;
+            if (LeftPressed)
+                jogo.Carro.PosicaoX = Math.Max(jogo.InicioXRua, jogo.Carro.PosicaoX - velocidade);
 
-            if (RightPressed &&
-                jogo.Carro.PosicaoX < jogo.FimXRua - jogo.Carro.Largura)
-                jogo.Carro.PosicaoX += velocidade;
+            if (RightPressed)
+                jogo.Carro.PosicaoX = Math.Min(jogo.FimXRua - jogo.Carro.Largura, jogo.Carro.PosicaoX + velocidade);
 
-            if (UpPressed && jogo.Carro.PosicaoY > jogo.InicioYRua)
-                jogo.Carro.PosicaoY -= velocidade;
+            if (UpPressed)
+                jogo.Carro.PosicaoY = Math.Max(jogo.InicioYRua, jogo.Carro.PosicaoY - velocidade);
 
-            if (DownPressed &&
-                jogo.Carro.PosicaoY < jogo.FimYRua)
-                jogo.Carro.PosicaoY += velocidade;
+            if (DownPressed)
+                jogo.Carro.PosicaoY = Math.Min(jogo.FimYRua, jogo.Carro.PosicaoY + velocidade);
 
-            picCarro.Location = new Point(
+            Point local = new Point(
                 jogo.Carro.PosicaoX,
                 jogo.Carro.PosicaoY
             );
+
+            if (picCarro.Location != local)
+                picCarro.Location = local;
         }
 
-        private void MovimentarCarroP2()
+        private void MovimentarCarroP2(double deltaMs)
         {
             if (!isMultiplayer || !jogador2Ativo)
                 return;
 
-            int velocidade = 20;
+            int velocidade = Math.Max(1, (int)Math.Round(20 * deltaMs / 30.0));
 
-            if (Left2Pressed && jogo.Carro2.PosicaoX > jogo.InicioXRua2)
-                jogo.Carro2.PosicaoX -= velocidade;
+            if (Left2Pressed)
+                jogo.Carro2.PosicaoX = Math.Max(jogo.InicioXRua2, jogo.Carro2.PosicaoX - velocidade);
 
-            if (Right2Pressed &&
-                jogo.Carro2.PosicaoX < jogo.FimXRua2 - jogo.Carro2.Largura)
-                jogo.Carro2.PosicaoX += velocidade;
+            if (Right2Pressed)
+                jogo.Carro2.PosicaoX = Math.Min(jogo.FimXRua2 - jogo.Carro2.Largura, jogo.Carro2.PosicaoX + velocidade);
 
-            if (Up2Pressed && jogo.Carro2.PosicaoY > jogo.InicioYRua)
-                jogo.Carro2.PosicaoY -= velocidade;
+            if (Up2Pressed)
+                jogo.Carro2.PosicaoY = Math.Max(jogo.InicioYRua, jogo.Carro2.PosicaoY - velocidade);
 
-            if (Down2Pressed &&
-                jogo.Carro2.PosicaoY < jogo.FimYRua)
-                jogo.Carro2.PosicaoY += velocidade;
+            if (Down2Pressed)
+                jogo.Carro2.PosicaoY = Math.Min(jogo.FimYRua, jogo.Carro2.PosicaoY + velocidade);
 
-            picCarro2.Location = new Point(
+            Point local = new Point(
                 jogo.Carro2.PosicaoX,
                 jogo.Carro2.PosicaoY
             );
+
+            if (picCarro2.Location != local)
+                picCarro2.Location = local;
+        }
+
+        private void MovimentarObstaculos(double deltaMs)
+        {
+            acumuladorObstaculos += pixelsObstaculoPorMs * deltaMs;
+
+            int deslocamento = (int)acumuladorObstaculos;
+
+            if (deslocamento <= 0)
+                return;
+
+            acumuladorObstaculos -= deslocamento;
+
+            jogo.MovimentaObstaculos(deslocamento);
+            AtualizarPictureBoxes();
+        }
+
+        private void MovimentarPoderes(double deltaMs)
+        {
+            double avanco = 25.0 * deltaMs / 30.0;
+
+            acumuladorPoder += avanco;
+            acumuladorPoder2 += avanco;
+
+            int deslocamento = (int)acumuladorPoder;
+            int deslocamento2 = (int)acumuladorPoder2;
+
+            acumuladorPoder -= deslocamento;
+            acumuladorPoder2 -= deslocamento2;
+
+            jogo.MovimentaPoder(deslocamento, deslocamento2);
         }
 
         private void AtualizarPoderes()
         {
             if (jogo.PoderAtivo)
             {
-                picPoder.Location = new Point(
-                    jogo.PoderX,
-                    jogo.PoderY
-                );
+                Point local = new Point(jogo.PoderX, jogo.PoderY);
 
-                picPoder.Visible = true;
+                if (picPoder.Location != local)
+                    picPoder.Location = local;
+
+                if (!picPoder.Visible)
+                    picPoder.Visible = true;
             }
-            else
+            else if (picPoder.Visible)
             {
                 picPoder.Visible = false;
             }
 
             if (jogo.Poder2Ativo)
             {
-                picPoder2.Location = new Point(
-                    jogo.Poder2X,
-                    jogo.Poder2Y
-                );
+                Point local = new Point(jogo.Poder2X, jogo.Poder2Y);
 
-                picPoder2.Visible = true;
+                if (picPoder2.Location != local)
+                    picPoder2.Location = local;
+
+                if (!picPoder2.Visible)
+                    picPoder2.Visible = true;
             }
-            else
+            else if (picPoder2.Visible)
             {
                 picPoder2.Visible = false;
             }
@@ -675,19 +724,19 @@ namespace JogoCorridaWinFormsApp
 
         private void AtualizarPictureBoxes()
         {
-            CriarObstaculosVisuais();
+            if (!ReferenceEquals(obstaculosVisuais, jogo.Obstaculos) || pictureBoxes.Count != jogo.Obstaculos.Count)
+            {
+                CriarObstaculosVisuais();
+                return;
+            }
 
             for (int i = 0; i < jogo.Obstaculos.Count; i++)
             {
                 var ob = jogo.Obstaculos[i];
+                var local = new Point(ob.PosicaoX, ob.PosicaoY);
 
-                if (i >= pictureBoxes.Count)
-                    continue;
-
-                pictureBoxes[i].Location = new Point(
-                    ob.PosicaoX,
-                    ob.PosicaoY
-                );
+                if (pictureBoxes[i].Location != local)
+                    pictureBoxes[i].Location = local;
             }
         }
 
@@ -847,7 +896,6 @@ namespace JogoCorridaWinFormsApp
             painelFim.Left = (ClientSize.Width - painelFim.Width) / 2;
             painelFim.Top = (ClientSize.Height - painelFim.Height) / 2;
 
-            // Cabeçalho do menu de fim de jogo
             Label lblFimTitulo = new Label
             {
                 AutoSize = false,
@@ -1002,9 +1050,15 @@ namespace JogoCorridaWinFormsApp
             jogador1Ativo = true;
             jogador2Ativo = isMultiplayer;
 
-            tempoUltimaMovimentacao = DateTime.Now;
             tempoUltimaPontuacao = DateTime.Now;
             tempoInicioJogo = DateTime.Now;
+
+            acumuladorObstaculos = 0;
+            acumuladorPoder = 0;
+            acumuladorPoder2 = 0;
+
+            relogioJogo.Restart();
+            ultimoQuadroMs = 0;
 
             picExplosao.Visible = false;
             picPoder.Visible = false;

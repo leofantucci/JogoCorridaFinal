@@ -244,14 +244,13 @@ namespace JogoCorridaWinFormsApp
 
         private void TrocarDeTela(Form proximaTela)
         {
-            proximaTela.Show(); // Abre a tela nova por cima
+            proximaTela.Show();
 
-            // Espera 100 milissegundos antes de esconder a tela velha
             System.Windows.Forms.Timer timerTransicao = new System.Windows.Forms.Timer();
             timerTransicao.Interval = 100;
             timerTransicao.Tick += (s, args) =>
             {
-                this.Hide(); // Esconde a tela antiga silenciosamente por baixo
+                this.Hide();
                 timerTransicao.Stop();
                 timerTransicao.Dispose();
             };

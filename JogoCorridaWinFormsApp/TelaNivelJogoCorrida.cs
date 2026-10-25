@@ -139,12 +139,10 @@ namespace JogoCorridaWinFormsApp
             telaTravada = true;
             somClick.Play();
 
-            // Lógica para descobrir qual nível foi clicado pela Tag ou pelo Nome
-            int nivelEscolhido = 1; // 1 = Fácil, 2 = Médio, 3 = Difícil
+            int nivelEscolhido = 1;
             if (selecionado.Name.Contains("Medio") || selecionado.Name.Contains("2")) nivelEscolhido = 2;
             if (selecionado.Name.Contains("Dificil") || selecionado.Name.Contains("3")) nivelEscolhido = 3;
 
-            // Envia tudo para o jogo final
             FormJogoCorrida jogoFinal = new FormJogoCorrida(isMultiplayer, cenarioSelecionado, nivelEscolhido);
             TrocarDeTela(jogoFinal);
         }
@@ -161,14 +159,13 @@ namespace JogoCorridaWinFormsApp
         }
         private void TrocarDeTela(Form proximaTela)
         {
-            proximaTela.Show(); // Abre a tela nova por cima
+            proximaTela.Show();
 
-            // Espera 100 milissegundos antes de esconder a tela velha
             System.Windows.Forms.Timer timerTransicao = new System.Windows.Forms.Timer();
             timerTransicao.Interval = 100;
             timerTransicao.Tick += (s, args) =>
             {
-                this.Hide(); // Esconde a tela antiga silenciosamente por baixo
+                this.Hide();
                 timerTransicao.Stop();
                 timerTransicao.Dispose();
             };

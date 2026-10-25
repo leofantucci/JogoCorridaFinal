@@ -183,7 +183,6 @@ namespace JogoCorrida
 
             if (key == 2)
             {
-                // Se o cenário não tem a rua 2 mapeada, usa a rua 1
                 if (FimXRua2 <= InicioXRua2)
                     return PosicionaObjeto(1);
 
@@ -197,7 +196,6 @@ namespace JogoCorrida
                 int minimo = InicioXRua;
                 int maximo = FimXRua - larguraObjeto;
 
-                // Sorteia em qual das duas ruas o obstáculo vai nascer
                 if (FimXRua2 > InicioXRua2 && rnd.Next(2) == 0)
                 {
                     minimo = InicioXRua2;
@@ -329,9 +327,14 @@ namespace JogoCorrida
 
         public void MovimentaObstaculos()
         {
+            MovimentaObstaculos(25);
+        }
+
+        public void MovimentaObstaculos(int deslocamento)
+        {
             foreach (var ob in Obstaculos)
             {
-                ob.PosicaoY += 25;
+                ob.PosicaoY += deslocamento;
 
                 if (ob.PosicaoY > YMaximo)
                 {
@@ -343,9 +346,14 @@ namespace JogoCorrida
 
         public void MovimentaPoder()
         {
+            MovimentaPoder(25, 25);
+        }
+
+        public void MovimentaPoder(int deslocamento, int deslocamento2)
+        {
             if (PoderAtivo)
             {
-                PoderY -= 25;
+                PoderY -= deslocamento;
 
                 if (PoderY < -100)
                 {
@@ -356,7 +364,7 @@ namespace JogoCorrida
 
             if (Poder2Ativo)
             {
-                Poder2Y -= 25;
+                Poder2Y -= deslocamento2;
 
                 if (Poder2Y < -100)
                 {
