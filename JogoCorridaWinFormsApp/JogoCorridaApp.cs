@@ -334,8 +334,8 @@ namespace JogoCorridaWinFormsApp
                 if (isMultiplayer)
                 {
                     // Duas ruas: 12.2% - 39.1% e 59.8% - 86.7% da largura
-                    inicioRua1 = 0.122; fimRua1 = 0.391;
-                    inicioRua2 = 0.598; fimRua2 = 0.867;
+                    inicioRua1 = 0.13; fimRua1 = 0.38;
+                    inicioRua2 = 0.59; fimRua2 = 0.84;
                 }
                 else
                 {
@@ -355,7 +355,7 @@ namespace JogoCorridaWinFormsApp
                 else
                 {
                     // 26.8% - 72.6% da largura
-                    inicioRua1 = 0.268; fimRua1 = 0.726;
+                    inicioRua1 = 0.3; fimRua1 = 0.6;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
