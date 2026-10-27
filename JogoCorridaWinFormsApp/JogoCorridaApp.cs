@@ -456,12 +456,12 @@ namespace JogoCorridaWinFormsApp
             {
                 if (isMultiplayer)
                 {
-                    inicioRua1 = 0.170; fimRua1 = 0.395;
-                    inicioRua2 = 0.611; fimRua2 = 0.819;
+                    inicioRua1 = 0.16; fimRua1 = 0.40;
+                    inicioRua2 = 0.60; fimRua2 = 0.84;
                 }
                 else
                 {
-                    inicioRua1 = 0.3; fimRua1 = 0.6;
+                    inicioRua1 = 0.22; fimRua1 = 0.68;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
@@ -859,10 +859,21 @@ namespace JogoCorridaWinFormsApp
                 MostrarExplosao(0);
             }
 
-            if (!jogador1Ativo && !jogador2Ativo)
+            if (isMultiplayer)
             {
-                GameOver();
-                return true;
+                if (!jogador1Ativo && !jogador2Ativo)
+                {
+                    GameOver();
+                    return true;
+                }
+            }
+            else
+            {
+                if (!jogador1Ativo)
+                {
+                    GameOver();
+                    return true;
+                }
             }
 
             return false;
