@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 namespace JogoCorridaWinFormsApp
 {
@@ -119,7 +120,15 @@ namespace JogoCorridaWinFormsApp
             }
             else if (keyData == Keys.Escape)
             {
-                VoltarParaMenu();
+                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+                if (senha == "1234")
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
@@ -149,7 +158,15 @@ namespace JogoCorridaWinFormsApp
         private void PicSair_Click(object sender, EventArgs e)
         {
             if (telaTravada) return;
-            VoltarParaMenu();
+            string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+            if (senha == "1234")
+            {
+                Application.Exit();
+            }
+            else
+            {
+                MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void VoltarParaMenu()

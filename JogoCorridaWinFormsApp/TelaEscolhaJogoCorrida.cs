@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Linq;
+using Microsoft.VisualBasic;
 
 namespace JogoCorridaWinFormsApp
 {
@@ -112,7 +113,16 @@ namespace JogoCorridaWinFormsApp
             }
             else if (keyData == Keys.Escape)
             {
-                VoltarParaMenu(); return true;
+                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+                if (senha == "1234")
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -145,7 +155,15 @@ namespace JogoCorridaWinFormsApp
             }
             else if (selecionado.Name == "picSair")
             {
-                VoltarParaMenu();
+                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+                if (senha == "1234")
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
         private void VoltarParaMenu()

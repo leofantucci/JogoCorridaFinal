@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
 	  <UseWPF>true</UseWPF>
@@ -10,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <ProjectReference Include="..\JogoCorrida\JogoCorrida.csproj" />
   </ItemGroup>
 

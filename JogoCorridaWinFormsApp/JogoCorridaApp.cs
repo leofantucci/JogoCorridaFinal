@@ -2,11 +2,13 @@ using JogoCorrida;
 using System.Diagnostics;
 using System.IO;
 using System.Media;
+using Microsoft.VisualBasic;
 
 namespace JogoCorridaWinFormsApp
 {
     public partial class FormJogoCorrida : Form
     {
+        private const string SenhaFechamento = "1234";
         private Jogo jogo;
 
         private readonly bool isMultiplayer;
@@ -60,6 +62,7 @@ namespace JogoCorridaWinFormsApp
 
         public FormJogoCorrida(bool modoMultiplayer, TipoCenario cenario, int nivel)
         {
+            this.FormClosing += FormJogoCorrida_FormClosing;
             this.isMultiplayer = modoMultiplayer;
             this.cenarioSelecionado = cenario;
             this.nivel = nivel;
@@ -117,25 +120,25 @@ namespace JogoCorridaWinFormsApp
             pixelsObstaculoPorMs = 25.0 / intervaloObstaculos;
 
             picCarro.BackColor = Color.Transparent;
-            picCarro.BackgroundImage = Properties.Resources.Novo_Projeto;
+            picCarro.BackgroundImage = CriarImagemCarroColorido(Color.Blue);
             picCarro.BackgroundImageLayout = ImageLayout.Stretch;
             picCarro.Size = new Size(60, 150);
             picCarro.Visible = true;
 
             picCarro2.BackColor = Color.Transparent;
-            picCarro2.BackgroundImage = CriarImagemCarro2();
+            picCarro2.BackgroundImage = CriarImagemCarroColorido(Color.Red);
             picCarro2.BackgroundImageLayout = ImageLayout.Stretch;
             picCarro2.Size = new Size(60, 150);
             picCarro2.Visible = isMultiplayer;
 
             picPoder.BackColor = Color.Transparent;
-            picPoder.BackgroundImage = Properties.Resources.poder;
+            picPoder.BackgroundImage = CriarImagemPoder(PersonagemSelecionado.P1);
             picPoder.BackgroundImageLayout = ImageLayout.Stretch;
             picPoder.Size = new Size(30, 60);
             picPoder.Visible = false;
 
             picPoder2.BackColor = Color.Transparent;
-            picPoder2.BackgroundImage = Properties.Resources.poder;
+            picPoder2.BackgroundImage = CriarImagemPoder(PersonagemSelecionado.P2);
             picPoder2.BackgroundImageLayout = ImageLayout.Stretch;
             picPoder2.Size = new Size(30, 60);
             picPoder2.Visible = false;
@@ -161,11 +164,11 @@ namespace JogoCorridaWinFormsApp
             Focus();
         }
 
-        private Image CriarImagemCarro2()
+        private Image CriarImagemCarroColorido(Color cor)
         {
-            Bitmap carro2 = new Bitmap(60, 150);
+            Bitmap baseCarro = new Bitmap(60, 150);
 
-            using (Graphics g = Graphics.FromImage(carro2))
+            using (Graphics g = Graphics.FromImage(baseCarro))
             {
                 g.DrawImage(
                     Properties.Resources.picCarro,
@@ -175,7 +178,22 @@ namespace JogoCorridaWinFormsApp
                 );
             }
 
-            return carro2;
+            Bitmap carroColorido = new Bitmap(baseCarro.Width, baseCarro.Height);
+            using (Graphics g = Graphics.FromImage(carroColorido))
+            {
+                g.DrawImage(baseCarro, 0, 0);
+                using (Brush brush = new SolidBrush(Color.FromArgb(160, cor)))
+                {
+                    g.FillRectangle(brush, 0, 0, baseCarro.Width, baseCarro.Height);
+                }
+            }
+
+            return carroColorido;
+        }
+
+        private Image CriarImagemCarro2()
+        {
+            return CriarImagemCarroColorido(Color.Red);
         }
 
         private void CriarHUD()
@@ -248,6 +266,77 @@ namespace JogoCorridaWinFormsApp
             lblControles.BringToFront();
         }
 
+        private Image CriarImagemPoder(string? nomePersonagem)
+        {
+            Bitmap bmp = new Bitmap(30, 60);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                Color cor = ObterCorPersonagem(nomePersonagem);
+                using (Brush brush = new SolidBrush(cor))
+                {
+                    g.FillEllipse(brush, 0, 0, 30, 30);
+                }
+                using (Pen pen = new Pen(Color.White, 2))
+                {
+                    g.DrawEllipse(pen, 0, 0, 30, 30);
+                }
+            }
+            return bmp;
+        }
+
+        private Color ObterCorPersonagem(string? nomePersonagem)
+        {
+            if (string.IsNullOrEmpty(nomePersonagem)) return Color.Yellow;
+            if (nomePersonagem.Contains("1")) return Color.Cyan;
+            if (nomePersonagem.Contains("2")) return Color.Magenta;
+            if (nomePersonagem.Contains("3")) return Color.Lime;
+            if (nomePersonagem.Contains("4")) return Color.Orange;
+            if (nomePersonagem.Contains("5")) return Color.Pink;
+            if (nomePersonagem.Contains("6")) return Color.Violet;
+            if (nomePersonagem.Contains("7")) return Color.Gold;
+            if (nomePersonagem.Contains("8")) return Color.Turquoise;
+            if (nomePersonagem.Contains("9")) return Color.Coral;
+            if (nomePersonagem.Contains("10")) return Color.LightGreen;
+            if (nomePersonagem.Contains("11")) return Color.SkyBlue;
+            if (nomePersonagem.Contains("12")) return Color.HotPink;
+            if (nomePersonagem.Contains("13")) return Color.Yellow;
+            if (nomePersonagem.Contains("14")) return Color.Red;
+            if (nomePersonagem.Contains("15")) return Color.Blue;
+            if (nomePersonagem.Contains("16")) return Color.Purple;
+            if (nomePersonagem.Contains("17")) return Color.Green;
+            if (nomePersonagem.Contains("18")) return Color.OrangeRed;
+            if (nomePersonagem.Contains("19")) return Color.DeepSkyBlue;
+            if (nomePersonagem.Contains("20")) return Color.Chartreuse;
+            return Color.Yellow;
+        }
+
+        private Image CriarImagemObstaculo()
+        {
+            Bitmap bmp = new Bitmap(60, 50);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.Transparent);
+                using (Brush brush = new SolidBrush(Color.FromArgb(200, 40, 40)))
+                {
+                    g.FillEllipse(brush, 5, 10, 50, 30);
+                }
+                using (Pen pen = new Pen(Color.Yellow, 2))
+                {
+                    g.DrawEllipse(pen, 5, 10, 50, 30);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        double angle = i * Math.PI / 4;
+                        int x1 = 30 + (int)(15 * Math.Cos(angle));
+                        int y1 = 25 + (int)(10 * Math.Sin(angle));
+                        int x2 = 30 + (int)(25 * Math.Cos(angle));
+                        int y2 = 25 + (int)(15 * Math.Sin(angle));
+                        g.DrawLine(pen, x1, y1, x2, y2);
+                    }
+                }
+            }
+            return bmp;
+        }
+
         private void CriarObstaculosVisuais()
         {
             SuspendLayout();
@@ -297,9 +386,7 @@ namespace JogoCorridaWinFormsApp
 
         private void AtualizarImagemObstaculo(PictureBox pictureBox, Elemento obstaculo)
         {
-            pictureBox.BackgroundImage = jogo.GetTipoObstaculo(obstaculo) == TipoObstaculo.Cone
-                ? imagemCone
-                : imagemCarroBatido;
+            pictureBox.BackgroundImage = CriarImagemObstaculo();
             pictureBox.BackgroundImageLayout = ImageLayout.Stretch;
         }
 
@@ -498,6 +585,20 @@ namespace JogoCorridaWinFormsApp
 
             if (e.KeyCode == Keys.Down)
                 Down2Pressed = false;
+        }
+
+        private void FormJogoCorrida_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+                if (senha != SenhaFechamento)
+                {
+                    e.Cancel = true;
+                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
         }
 
         private void FormJogoCorrida_Load(object sender, EventArgs e)

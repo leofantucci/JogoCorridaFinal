@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 namespace JogoCorridaWinFormsApp
 {
@@ -30,6 +31,46 @@ namespace JogoCorridaWinFormsApp
             {
                 picSair.Click += PicSair_Click;
             }
+
+            CarregarEstatisticas();
+        }
+
+        private void CarregarEstatisticas()
+        {
+            try
+            {
+                string caminho = System.IO.Path.Combine(AppContext.BaseDirectory, "recorde.txt");
+                int recorde = 0;
+                if (System.IO.File.Exists(caminho))
+                {
+                    string texto = System.IO.File.ReadAllText(caminho).Trim();
+                    int.TryParse(texto, out recorde);
+                }
+
+                Label lblRecorde = new Label
+                {
+                    AutoSize = true,
+                    Font = new Font("Arial", 48, FontStyle.Bold),
+                    ForeColor = Color.Gold,
+                    BackColor = Color.Transparent,
+                    Text = recorde.ToString(),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+
+                if (panelPrincipal3 != null)
+                {
+                    lblRecorde.Location = new Point((panelPrincipal3.Width - lblRecorde.PreferredWidth) / 2, 400);
+                    panelPrincipal3.Controls.Add(lblRecorde);
+                    lblRecorde.BringToFront();
+                }
+                else
+                {
+                    lblRecorde.Location = new Point((this.ClientSize.Width - lblRecorde.PreferredWidth) / 2, this.ClientSize.Height / 2);
+                    this.Controls.Add(lblRecorde);
+                    lblRecorde.BringToFront();
+                }
+            }
+            catch { }
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
@@ -48,7 +89,15 @@ namespace JogoCorridaWinFormsApp
         }
         private void PicSair_Click(object sender, EventArgs e)
         {
-            VoltarParaMenu();
+            string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+            if (senha == "1234")
+            {
+                Application.Exit();
+            }
+            else
+            {
+                MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void VoltarParaMenu()

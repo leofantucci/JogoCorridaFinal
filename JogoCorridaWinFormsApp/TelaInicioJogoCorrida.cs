@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq; // Obrigatório para ordenar a navegação do teclado
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 
 namespace JogoCorridaWinFormsApp
@@ -39,6 +40,7 @@ namespace JogoCorridaWinFormsApp
         public bool isMultiplayer = false;
         public int jogadorAtual = 1;
         PictureBox personagemP1 = null;
+        PictureBox personagemP2 = null;
 
         public TelaInicioJogoCorrida(bool modoMultiplayer = false)
         {
@@ -184,8 +186,15 @@ namespace JogoCorridaWinFormsApp
             }
             else if (keyData == Keys.Escape)
             {
-                // Permite usar o botão ESC do teclado para voltar ao Menu
-                VoltarParaMenu();
+                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+                if (senha == "1234")
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 return true;
             }
 
@@ -350,12 +359,22 @@ namespace JogoCorridaWinFormsApp
                     // Som no mesmo instante em que a borda do P2 aparece
                     somClick.Play();
                 }
+                else if (isMultiplayer && jogadorAtual == 2)
+                {
+                    personagemP2 = personagemEscolhido;
+                    TelaCenarioJogoCorrida jogo = new TelaCenarioJogoCorrida(isMultiplayer);
+                    // Passar personagens via propriedades estáticas ou salvar em algum lugar global
+                    PersonagemSelecionado.P1 = personagemP1?.Name;
+                    PersonagemSelecionado.P2 = personagemP2?.Name;
+                    TrocarDeTela(jogo);
+                }
                 else
                 {
-                    // Se for Singleplayer ou o P2 já escolheu, vai pro Cenário!
-                    TelaCenarioJogoCorrida jogo = new TelaCenarioJogoCorrida( isMultiplayer);
+                    // Singleplayer
+                    PersonagemSelecionado.P1 = personagemEscolhido?.Name;
+                    PersonagemSelecionado.P2 = null;
+                    TelaCenarioJogoCorrida jogo = new TelaCenarioJogoCorrida(isMultiplayer);
                     TrocarDeTela(jogo);
-                    
                 }
             };
             timerEspera.Start();
@@ -370,7 +389,15 @@ namespace JogoCorridaWinFormsApp
         private void PicSair_Click(object sender, EventArgs e)
         {
             if (telaTravada) return; // Evita que o jogador saia no meio da roleta girando
-            VoltarParaMenu();
+            string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
+            if (senha == "1234")
+            {
+                Application.Exit();
+            }
+            else
+            {
+                MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void VoltarParaMenu()
