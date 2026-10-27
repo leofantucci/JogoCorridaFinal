@@ -133,7 +133,7 @@ namespace JogoCorridaWinFormsApp.Properties {
         /// <summary>
         ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap cenario4gif {
+        internal static System.Drawing.Bitmap cenarioteste {
             get {
                 object obj = ResourceManager.GetObject("cenario4gif", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));

@@ -143,11 +143,6 @@ namespace JogoCorridaWinFormsApp
                 TelaEscolhaJogoCorrida telaSelecao = new TelaEscolhaJogoCorrida();
                 TrocarDeTela(telaSelecao);
             }
-            else if (selecionado.Name == "picEstatisticas")
-            {
-                TelaEstatisticaJogoCorrida telaSelecao = new TelaEstatisticaJogoCorrida();
-                TrocarDeTela(telaSelecao);
-            }
             else if (selecionado.Name == "picSair")
             {
                 Application.Exit();

@@ -426,7 +426,7 @@ namespace JogoCorridaWinFormsApp
             {
                 imagemEscolhida = isMultiplayer
                     ? Properties.Resources.cenario4multgif
-                    : Properties.Resources.cenario4gif;
+                    : Properties.Resources.cenarioteste;
             }
 
             this.BackgroundImage = imagemEscolhida;
@@ -436,7 +436,6 @@ namespace JogoCorridaWinFormsApp
         private void AplicarLimitesRuas()
         {
             int largura = Screen.PrimaryScreen.Bounds.Width;
-
             double inicioRua1, fimRua1, inicioRua2, fimRua2;
 
             if (cenarioSelecionado == TipoCenario.Areas_Rochosas)
@@ -444,11 +443,11 @@ namespace JogoCorridaWinFormsApp
                 if (isMultiplayer)
                 {
                     inicioRua1 = 0.13; fimRua1 = 0.38;
-                    inicioRua2 = 0.59; fimRua2 = 0.84;
+                    inicioRua2 = 0.62; fimRua2 = 0.86;
                 }
                 else
                 {
-                    inicioRua1 = 0.245; fimRua1 = 0.747;
+                    inicioRua1 = 0.26; fimRua1 = 0.747;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
@@ -456,12 +455,14 @@ namespace JogoCorridaWinFormsApp
             {
                 if (isMultiplayer)
                 {
-                    inicioRua1 = 0.16; fimRua1 = 0.40;
-                    inicioRua2 = 0.60; fimRua2 = 0.84;
+                    // ALÉM DO MUNDO MULTIPLAYER: Esquerda do P1 (aumentado de 0.16 para 0.18) e P2 (de 0.60 para 0.62)
+                    inicioRua1 = 0.21; fimRua1 = 0.37;
+                    inicioRua2 = 0.62; fimRua2 = 0.79;
                 }
                 else
                 {
-                    inicioRua1 = 0.22; fimRua1 = 0.68;
+                    // ALÉM DO MUNDO SINGLEPLAYER: Esquerda aumentada de 0.22 para 0.25
+                    inicioRua1 = 0.30; fimRua1 = 0.68;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
@@ -469,25 +470,26 @@ namespace JogoCorridaWinFormsApp
             {
                 if (isMultiplayer)
                 {
-                    inicioRua1 = 0.144; fimRua1 = 0.345;
-                    inicioRua2 = 0.655; fimRua2 = 0.856;
+                    inicioRua1 = 0.143; fimRua1 = 0.329;
+                    inicioRua2 = 0.675; fimRua2 = 0.87;
                 }
                 else
                 {
-                    inicioRua1 = 0.301; fimRua1 = 0.681;
+                    inicioRua1 = 0.331; fimRua1 = 0.67;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
-            else
+            else // FLORESTA FELIZ (Cenário 4)
             {
                 if (isMultiplayer)
                 {
-                    inicioRua1 = 0.035; fimRua1 = 0.340;
-                    inicioRua2 = 0.660; fimRua2 = 0.965;
+                    // FLORESTA FELIZ MULTIPLAYER: Esquerda do P1 (aumentado de 0.035 para 0.060) e P2 (de 0.660 para 0.685)
+                    inicioRua1 = 0.137; fimRua1 = 0.342;
+                    inicioRua2 = 0.662; fimRua2 = 0.85;
                 }
                 else
                 {
-                    inicioRua1 = 0.300; fimRua1 = 0.720;
+                    inicioRua1 = 0.346; fimRua1 = 0.657;
                     inicioRua2 = inicioRua1; fimRua2 = fimRua1;
                 }
             }
