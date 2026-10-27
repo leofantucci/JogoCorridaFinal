@@ -2,13 +2,11 @@ using JogoCorrida;
 using System.Diagnostics;
 using System.IO;
 using System.Media;
-using Microsoft.VisualBasic;
 
 namespace JogoCorridaWinFormsApp
 {
     public partial class FormJogoCorrida : Form
     {
-        private const string SenhaFechamento = "1234";
         private Jogo jogo;
 
         private readonly bool isMultiplayer;
@@ -18,8 +16,8 @@ namespace JogoCorridaWinFormsApp
         private readonly List<PictureBox> pictureBoxes = [];
 
         private readonly Stopwatch relogioJogo = Stopwatch.StartNew();
-        private readonly Image imagemCone = Properties.Resources.cone;
-        private readonly Image imagemCarroBatido = Properties.Resources.carro_batido;
+        private Image? imagemObstaculo1Carregada;
+        private Image? imagemObstaculo2Carregada;
 
         private long ultimoQuadroMs;
         private double acumuladorObstaculos;
@@ -62,7 +60,6 @@ namespace JogoCorridaWinFormsApp
 
         public FormJogoCorrida(bool modoMultiplayer, TipoCenario cenario, int nivel)
         {
-            this.FormClosing += FormJogoCorrida_FormClosing;
             this.isMultiplayer = modoMultiplayer;
             this.cenarioSelecionado = cenario;
             this.nivel = nivel;
@@ -119,14 +116,15 @@ namespace JogoCorridaWinFormsApp
             int intervaloObstaculos = Math.Max(30, (int)Math.Ceiling(jogo.Velocidade / 30.0) * 30);
             pixelsObstaculoPorMs = 25.0 / intervaloObstaculos;
 
+            CarregarImagensPersonalizadas();
             picCarro.BackColor = Color.Transparent;
-            picCarro.BackgroundImage = CriarImagemCarroColorido(Color.Blue);
+            picCarro.BackgroundImage = CarregarImagem("carro_p1.png") ?? Properties.Resources.Novo_Projeto;
             picCarro.BackgroundImageLayout = ImageLayout.Stretch;
             picCarro.Size = new Size(60, 150);
             picCarro.Visible = true;
 
             picCarro2.BackColor = Color.Transparent;
-            picCarro2.BackgroundImage = CriarImagemCarroColorido(Color.Red);
+            picCarro2.BackgroundImage = CarregarImagem("carro_p2.png") ?? CriarImagemCarro2();
             picCarro2.BackgroundImageLayout = ImageLayout.Stretch;
             picCarro2.Size = new Size(60, 150);
             picCarro2.Visible = isMultiplayer;
@@ -164,11 +162,11 @@ namespace JogoCorridaWinFormsApp
             Focus();
         }
 
-        private Image CriarImagemCarroColorido(Color cor)
+        private Image CriarImagemCarro2()
         {
-            Bitmap baseCarro = new Bitmap(60, 150);
+            Bitmap carro2 = new Bitmap(60, 150);
 
-            using (Graphics g = Graphics.FromImage(baseCarro))
+            using (Graphics g = Graphics.FromImage(carro2))
             {
                 g.DrawImage(
                     Properties.Resources.picCarro,
@@ -178,22 +176,7 @@ namespace JogoCorridaWinFormsApp
                 );
             }
 
-            Bitmap carroColorido = new Bitmap(baseCarro.Width, baseCarro.Height);
-            using (Graphics g = Graphics.FromImage(carroColorido))
-            {
-                g.DrawImage(baseCarro, 0, 0);
-                using (Brush brush = new SolidBrush(Color.FromArgb(160, cor)))
-                {
-                    g.FillRectangle(brush, 0, 0, baseCarro.Width, baseCarro.Height);
-                }
-            }
-
-            return carroColorido;
-        }
-
-        private Image CriarImagemCarro2()
-        {
-            return CriarImagemCarroColorido(Color.Red);
+            return carro2;
         }
 
         private void CriarHUD()
@@ -337,6 +320,30 @@ namespace JogoCorridaWinFormsApp
             return bmp;
         }
 
+        private void CarregarImagensPersonalizadas()
+        {
+            imagemObstaculo1Carregada = CarregarImagem("obstaculo1.png");
+            imagemObstaculo2Carregada = CarregarImagem("obstaculo2.png");
+        }
+
+        private Image? CarregarImagem(string nomeArquivo)
+        {
+            try
+            {
+                string caminho = Path.Combine(AppContext.BaseDirectory, "Imagens", nomeArquivo);
+                if (!File.Exists(caminho))
+                    caminho = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Imagens", nomeArquivo);
+                if (!File.Exists(caminho))
+                    caminho = Path.Combine(Directory.GetCurrentDirectory(), "Imagens", nomeArquivo);
+                if (File.Exists(caminho))
+                {
+                    return Image.FromFile(caminho);
+                }
+            }
+            catch { }
+            return null;
+        }
+
         private void CriarObstaculosVisuais()
         {
             SuspendLayout();
@@ -386,7 +393,10 @@ namespace JogoCorridaWinFormsApp
 
         private void AtualizarImagemObstaculo(PictureBox pictureBox, Elemento obstaculo)
         {
-            pictureBox.BackgroundImage = CriarImagemObstaculo();
+            if (jogo.GetTipoObstaculo(obstaculo) == JogoCorrida.TipoObstaculo.Cone)
+                pictureBox.BackgroundImage = imagemObstaculo1Carregada ?? CriarImagemObstaculo();
+            else
+                pictureBox.BackgroundImage = imagemObstaculo2Carregada ?? CriarImagemObstaculo();
             pictureBox.BackgroundImageLayout = ImageLayout.Stretch;
         }
 
@@ -585,20 +595,6 @@ namespace JogoCorridaWinFormsApp
 
             if (e.KeyCode == Keys.Down)
                 Down2Pressed = false;
-        }
-
-        private void FormJogoCorrida_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
-                if (senha != SenhaFechamento)
-                {
-                    e.Cancel = true;
-                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
         }
 
         private void FormJogoCorrida_Load(object sender, EventArgs e)

@@ -120,15 +120,7 @@ namespace JogoCorridaWinFormsApp
             }
             else if (keyData == Keys.Escape)
             {
-                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
-                if (senha == "1234")
-                {
-                    Application.Exit();
-                }
-                else
-                {
-                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                Application.Exit();
                 return true;
             }
 
@@ -158,29 +150,13 @@ namespace JogoCorridaWinFormsApp
             }
             else if (selecionado.Name == "picSair")
             {
-                string senha = Microsoft.VisualBasic.Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
-                if (senha == "1234")
-                {
-                    Application.Exit();
-                }
-                else
-                {
-                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                Application.Exit();
             }
         }
 
         private void PicSair_Click(object sender, EventArgs e)
         {
-            string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
-            if (senha == "1234")
-            {
-                Application.Exit();
-            }
-            else
-            {
-                MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Application.Exit();
         }
 
         // SISTEMA DE TRANSIÇÃO SUAVE (Tela preta de arcade)

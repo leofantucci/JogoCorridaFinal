@@ -186,15 +186,8 @@ namespace JogoCorridaWinFormsApp
             }
             else if (keyData == Keys.Escape)
             {
-                string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
-                if (senha == "1234")
-                {
-                    Application.Exit();
-                }
-                else
-                {
-                    MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                // Permite usar o botão ESC do teclado para voltar ao Menu
+                VoltarParaMenu();
                 return true;
             }
 
@@ -389,15 +382,7 @@ namespace JogoCorridaWinFormsApp
         private void PicSair_Click(object sender, EventArgs e)
         {
             if (telaTravada) return; // Evita que o jogador saia no meio da roleta girando
-            string senha = Interaction.InputBox("Digite a senha para fechar o jogo:", "Bloqueado", "");
-            if (senha == "1234")
-            {
-                Application.Exit();
-            }
-            else
-            {
-                MessageBox.Show("Senha incorreta!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            VoltarParaMenu();
         }
 
         private void VoltarParaMenu()
